@@ -1,0 +1,77 @@
+{
+  "project": {
+    "name": "Likeness Drift Lab",
+    "version": "1.0",
+    "namespace": "com.example",
+    "application_id": "com.aistudio.likenessdrift.labx",
+    "description": "Zero-API Android tool for simulating, compounding, and benchmarking facial likeness drift across AI video generation runs (LTX-Video, Wan, Runway) and validating agent re-anchoring pipelines.",
+    "architecture": "MVVM + Jetpack Compose (Material 3)",
+    "requirements": {
+      "jdk": "JDK 17 or JDK 21",
+      "android_min_sdk": 24,
+      "android_compile_sdk": 36,
+      "android_target_sdk": 36,
+      "kotlin_version": "2.2.10",
+      "agp_version": "9.1.1",
+      "compose_bom": "2024.09.00"
+    }
+  },
+  "build_and_packaging": {
+    "quick_start": "Execute gradle assembleDebug to build the debug APK immediately.",
+    "gradle_commands": {
+      "build_debug_apk": "./gradlew assembleDebug",
+      "build_release_apk": "./gradlew assembleRelease",
+      "run_unit_and_robolectric_tests": "./gradlew :app:testDebugUnitTest",
+      "clean_build": "./gradlew clean"
+    },
+    "apk_output_locations": {
+      "debug_apk": "app/build/outputs/apk/debug/app-debug.apk",
+      "release_apk": "app/build/outputs/apk/release/app-release-unsigned.apk"
+    },
+    "zero_api_notice": "No external cloud APIs, API keys, or backend services are needed. All image processing, mesh deformation, and delta analysis are executed entirely on-device via Android Canvas & Bitmaps."
+  },
+  "key_components": {
+    "DriftEngine": {
+      "file": "app/src/main/java/com/example/engine/DriftEngine.kt",
+      "description": "High-performance on-device 2D mesh deformation and pixel delta calculation engine.",
+      "methods": {
+        "applyDrift": "Warps source bitmap using Canvas.drawBitmapMesh (26x26 grid, 729 vertices) with smooth cubic Hermite falloff displacement around facial landmarks (eyes, mouth, jaw). Applies latent diffusion micro-softening and chromatic temperature shifts.",
+        "generateDifferenceHeatmap": "Amplifies pixel-level differences (7.5x) and maps delta values to a false-color spectrum (Cyan -> Green -> Yellow -> Hot Red) to reveal invisible spatial drift.",
+        "calculateRealImageDifference": "Compares an actual Control/Reference photo against a real video frame or agent fix, outputting quantified likeness retention % and peak/mean pixel displacement.",
+        "calculateMetrics": "Computes mathematical likeness retention %, eye asymmetry %, and agent verdict (e.g. PASS vs RE-ANCHOR REQUIRED)."
+      }
+    },
+    "DriftViewModel": {
+      "file": "app/src/main/java/com/example/ui/viewmodel/DriftViewModel.kt",
+      "description": "Central state manager handling photo selection, compound generation cycles, presets, benchmark comparisons, and file export.",
+      "key_states": [
+        "referenceBitmap: Control/Reference photo (Gen 0)",
+        "driftedBitmap: Current output frame (simulated or real test frame)",
+        "heatmapBitmap: False-color difference map",
+        "isComparisonMode: Toggles between synthetic Drift Simulator and 2-Photo Benchmark Test Bed",
+        "currentGen: Generation depth (Gen 0, Gen 1, Gen 2, etc.)"
+      ]
+    },
+    "ImageUtils": {
+      "file": "app/src/main/java/com/example/engine/ImageUtils.kt",
+      "description": "Image loading, downsampling (max 1024px for smooth 60fps), MediaStore saving (JPEG/PNG in Pictures/LikenessDriftLab), and FileProvider sharing Intent."
+    },
+    "DriftLabScreen": {
+      "file": "app/src/main/java/com/example/ui/screens/DriftLabScreen.kt",
+      "description": "Main UI featuring TopAppBar, Mode Switcher (Simulator vs 2-Photo Benchmark), interactive Split Slider, Delta Heatmap, Metrics Card, 1-tap Export buttons, and Drift Controls deck."
+    }
+  },
+  "agent_testing_workflow": {
+    "step_1_drift_simulation": "User dials in drift or taps 'Compound Step (+1 Clip)' to generate synthetic video drift across multiple clips.",
+    "step_2_export_to_agent": "User taps 'Save JPEG' or 'Share to Fixer' to send the drifted frame to the agent (Muse).",
+    "step_3_agent_re_anchoring": "The agent inspects the frame, detects eye/mouth landmark displacement against the original reference, in-paints/re-generates the face, and returns a fixed image.",
+    "step_4_real_world_verification": "User switches to '2-Photo Test Bed' mode, loads the Control Photo into Slot 1 and the Agent's fixed image into Slot 2. The Delta Heatmap confirms if the fix successfully restored likeness (Score >= 95% = PASS)."
+  },
+  "directory_structure": {
+    "gradle_config": "app/build.gradle.kts, gradle/libs.versions.toml, settings.gradle.kts",
+    "manifest": "app/src/main/AndroidManifest.xml",
+    "source_code": "app/src/main/java/com/example/",
+    "resources": "app/src/main/res/ (drawable, mipmap, values, xml)",
+    "sample_assets": "app/src/main/res/drawable/sample_portrait.jpg"
+  }
+}

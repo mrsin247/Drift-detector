@@ -1,0 +1,6 @@
+{
+  "name": "Likeness Drift Lab",
+  "description": "Zero-API facial likeness drift and feature morph simulator for AI video generation testing",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
